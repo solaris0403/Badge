@@ -12,7 +12,6 @@ import com.example.badgelibrary.widget.NumBadge;
 public class TestActivity extends AppCompatActivity {
     private Button mBtnTwo;
     private NumBadge mNumBadge;
-    Badge badge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,14 +19,12 @@ public class TestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_test);
         mBtnTwo = (Button) findViewById(R.id.btn_two);
         mNumBadge = (NumBadge) findViewById(R.id.badge);
-        badge = new Badge();
-        badge.setOwner(BadgeHelper.BADGE_TWO);
-        badge.setIBadge(mNumBadge);
-        BadgeHelper.bindBadge(badge, mNumBadge);
+        BadgeHelper.bindBadge(BadgeHelper.BADGE_TEST_ONE, mNumBadge);
         mBtnTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Badge badge = BadgeHelper.findBadge(BadgeHelper.BADGE_TWO);
+                Badge badge = BadgeHelper.findBadge(BadgeHelper.BADGE_TEST_ONE);
+                badge.setLeader(BadgeHelper.BADGE_MAIN_ONE);
                 badge.setCount(badge.getCount() + 1);
                 BadgeHelper.updateBadge(badge);
             }

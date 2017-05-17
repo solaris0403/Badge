@@ -8,8 +8,23 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <com.example.badgelibrary.widget.NumBadge
+            android:id="@+id/badge_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <com.example.badgelibrary.widget.NumBadge
+            android:id="@+id/badge_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <Button
             android:id="@+id/btn_one"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0" />
+        <Button
+            android:id="@+id/btn_two"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"

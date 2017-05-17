@@ -1,18 +1,11 @@
 package com.example.badgelibrary;
 
 
-import com.activeandroid.Model;
-import com.activeandroid.annotation.Column;
-import com.activeandroid.annotation.Table;
-
-import java.lang.ref.SoftReference;
-
 /**
  * Badge实体类，其中持有View的引用，每次初始化的时候会针对现有的owner进行数据库删除。
  */
 
-@Table(name = "tb_badge")
-public class Badge extends Model {
+public class Badge {
     //显示形式
     public static final int BADGE_DISPLAY_TYPE_DOT = 0x01;
     public static final int BADGE_DISPLAY_TYPE_CIRCLE = 0x01 << 1;
@@ -24,21 +17,18 @@ public class Badge extends Model {
     public static final int BADGE_DISPLAY_MODE_AUTO = 0x03;
     public static final int BADGE_DISPLAY_MODE_MANUAL = 0x03 << 1;
 
-    @Column(name = "type")
-    public int mDisplayType = BADGE_DISPLAY_TYPE_DOT;
-    @Column(name = "state")
-    public int mDisplayState = BADGE_DISPLAY_STATE_VISIBLE;
-    @Column(name = "mode")
-    public int mDisplayMode = BADGE_DISPLAY_MODE_AUTO;
-    @Column(name = "count")
-    public int mCount;
-    @Column(name = "content")
-    public String mContent;
-    @Column(name = "owner", notNull = true, unique = true)
-    public String mOwner;
-    @Column(name = "leader")
-    public String mLeader;
-    private SoftReference<IBadge> mIBadge;
+    private int mDisplayType = BADGE_DISPLAY_TYPE_DOT;
+    private int mDisplayState = BADGE_DISPLAY_STATE_VISIBLE;
+    private int mDisplayMode = BADGE_DISPLAY_MODE_AUTO;
+    private int mCount;
+    private String mContent;
+    private String mOwner;
+    private String mLeader;
+    private IBadge mIBadge;
+
+    public Badge(String owner) {
+        this.mOwner = owner;
+    }
 
     public int getDisplayType() {
         return mDisplayType;
@@ -84,7 +74,7 @@ public class Badge extends Model {
         return mOwner;
     }
 
-    public void setOwner(String owner) {
+    private void setOwner(String owner) {
         this.mOwner = owner;
     }
 
@@ -97,10 +87,24 @@ public class Badge extends Model {
     }
 
     public IBadge getIBadge() {
-        return mIBadge.get();
+        return mIBadge;
     }
 
     public void setIBadge(IBadge iBadge) {
-        this.mIBadge = new SoftReference<>(iBadge);
+        this.mIBadge = iBadge;
+    }
+
+    @Override
+    public String toString() {
+        return "Badge{" +
+                "mDisplayType=" + mDisplayType +
+                ", mDisplayState=" + mDisplayState +
+                ", mDisplayMode=" + mDisplayMode +
+                ", mCount=" + mCount +
+                ", mContent='" + mContent + '\'' +
+                ", mOwner='" + mOwner + '\'' +
+                ", mLeader='" + mLeader + '\'' +
+                ", mIBadge=" + mIBadge +
+                '}';
     }
 }
