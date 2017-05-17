@@ -13,6 +13,7 @@ import com.example.badgelibrary.IBadge;
  */
 
 public class NumBadge extends TextView implements IBadge {
+    private Badge mBadge;
 
     public NumBadge(Context context) {
         this(context, null);
@@ -28,7 +29,6 @@ public class NumBadge extends TextView implements IBadge {
     }
 
     private void initViews() {
-
     }
 
     @Override
@@ -57,6 +57,11 @@ public class NumBadge extends TextView implements IBadge {
 
     @Override
     public void setDisplayContent(String content) {
-        setText(content);
+//        setText(content);
+    }
+
+    @Override
+    public void setDisplayCount(int count) {
+        setText(count);
     }
 }

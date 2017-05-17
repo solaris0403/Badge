@@ -7,13 +7,13 @@ import android.widget.Button;
 
 import com.example.badgelibrary.Badge;
 import com.example.badgelibrary.BadgeHelper;
-import com.example.badgelibrary.BadgeManager;
 import com.example.badgelibrary.widget.NumBadge;
 
 public class TestActivity extends AppCompatActivity {
     private Button mBtnTwo;
     private NumBadge mNumBadge;
     Badge badge;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -21,22 +21,16 @@ public class TestActivity extends AppCompatActivity {
         mBtnTwo = (Button) findViewById(R.id.btn_two);
         mNumBadge = (NumBadge) findViewById(R.id.badge);
         badge = new Badge();
-        badge.setOwner("aaa");
-        badge.setContent("000");
+        badge.setOwner(BadgeHelper.BADGE_TWO);
         badge.setIBadge(mNumBadge);
-        BadgeHelper.bindBadge(badge);
+        BadgeHelper.bindBadge(badge, mNumBadge);
         mBtnTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BadgeManager.getInstance().update("end");
-                finish();
+                Badge badge = BadgeHelper.findBadge(BadgeHelper.BADGE_TWO);
+                badge.setCount(badge.getCount() + 1);
+                BadgeHelper.updateBadge(badge);
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        BadgeHelper.unbindBadge(badge);
-        super.onDestroy();
     }
 }

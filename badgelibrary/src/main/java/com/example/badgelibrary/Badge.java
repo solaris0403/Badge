@@ -1,10 +1,18 @@
 package com.example.badgelibrary;
 
+
+import com.activeandroid.Model;
+import com.activeandroid.annotation.Column;
+import com.activeandroid.annotation.Table;
+
+import java.lang.ref.SoftReference;
+
 /**
- * Created by tony on 5/15/17.
+ * Badge实体类，其中持有View的引用，每次初始化的时候会针对现有的owner进行数据库删除。
  */
 
-public class Badge {
+@Table(name = "tb_badge")
+public class Badge extends Model {
     //显示形式
     public static final int BADGE_DISPLAY_TYPE_DOT = 0x01;
     public static final int BADGE_DISPLAY_TYPE_CIRCLE = 0x01 << 1;
@@ -16,13 +24,21 @@ public class Badge {
     public static final int BADGE_DISPLAY_MODE_AUTO = 0x03;
     public static final int BADGE_DISPLAY_MODE_MANUAL = 0x03 << 1;
 
-    private int mDisplayType = BADGE_DISPLAY_TYPE_DOT;
-    private int mDisplayState = BADGE_DISPLAY_STATE_VISIBLE;
-    private int mDisplayMode = BADGE_DISPLAY_MODE_AUTO;
-    private String mContent;
-    private String mOwner;
-    private String mLeader;
-    private IBadge mIBadge;
+    @Column(name = "type")
+    public int mDisplayType = BADGE_DISPLAY_TYPE_DOT;
+    @Column(name = "state")
+    public int mDisplayState = BADGE_DISPLAY_STATE_VISIBLE;
+    @Column(name = "mode")
+    public int mDisplayMode = BADGE_DISPLAY_MODE_AUTO;
+    @Column(name = "count")
+    public int mCount;
+    @Column(name = "content")
+    public String mContent;
+    @Column(name = "owner", notNull = true, unique = true)
+    public String mOwner;
+    @Column(name = "leader")
+    public String mLeader;
+    private SoftReference<IBadge> mIBadge;
 
     public int getDisplayType() {
         return mDisplayType;
@@ -46,6 +62,14 @@ public class Badge {
 
     public void setDisplayMode(int displayMode) {
         this.mDisplayMode = displayMode;
+    }
+
+    public int getCount() {
+        return mCount;
+    }
+
+    public void setCount(int count) {
+        this.mCount = count;
     }
 
     public String getContent() {
@@ -73,10 +97,10 @@ public class Badge {
     }
 
     public IBadge getIBadge() {
-        return mIBadge;
+        return mIBadge.get();
     }
 
     public void setIBadge(IBadge iBadge) {
-        this.mIBadge = iBadge;
+        this.mIBadge = new SoftReference<>(iBadge);
     }
 }

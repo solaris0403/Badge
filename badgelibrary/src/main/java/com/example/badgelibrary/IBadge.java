@@ -25,4 +25,6 @@ public interface IBadge {
      * @param content
      */
     void setDisplayContent(String content);
+
+    void setDisplayCount(int count);
 }

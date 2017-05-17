@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.example.badgelibrary.BadgeManager;
-
 public class MainActivity extends AppCompatActivity {
     private Button mBtnOne;
 
@@ -16,7 +14,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mBtnOne = (Button) findViewById(R.id.btn_one);
-        BadgeManager.getInstance().bindBadge(mBtnOne);
         mBtnOne.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
