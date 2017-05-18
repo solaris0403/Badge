@@ -19,6 +19,6 @@ public class BadgeHelper {
     }
 
     public static Badge findBadge(String owner) {
-        return DBUtils.findBadgeByOwner(owner);
+        return DBUtils.queryBadge(owner);
     }
 }
