@@ -18,7 +18,7 @@ import static com.example.badgelibrary.DBUtils.insertBadge;
  * <p>
  * 更新，更新数据库，更新
  */
-public class BadgeManager {
+public class BadgeManager{
     private static final String TAG = "BadgeManager";
     private static BadgeManager sInstance = null;
 
