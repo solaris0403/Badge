@@ -35,7 +35,7 @@ public class BadgeTable {
                 + Columns.BADGE_STATE + " INTEGER DEFAULT 0 ,"
                 + Columns.BADGE_MODE + " INTEGER DEFAULT 0 ,"
                 + Columns.BADGE_COUNT + " INTEGER DEFAULT 0 ,"
-                + Columns.BADGE_OWNER + " TEXT UNIQUE, "
+                + Columns.BADGE_OWNER + " TEXT NOT NULL UNIQUE, "
                 + Columns.BADGE_LEADER + " TEXT DEFAULT '' ,"
                 + Columns.BADGE_CONTENT + " TEXT DEFAULT '' "
                 + ");";

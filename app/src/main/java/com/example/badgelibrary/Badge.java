@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Badge实体类，利用List持有逻辑子元素的引用，利用Composite Pattern进行遍历更新依赖。
+ * Badge实体类，利用List持有逻辑子元素的引用，进行遍历更新依赖。
  */
 
 public class Badge {
@@ -50,11 +50,13 @@ public class Badge {
         this.mDisplayMode = displayMode;
     }
 
+    /**
+     * 通过深层遍历，累加子元素所有的计数
+     */
     public int getCount() {
         if (!mChild.isEmpty()) {
             mCount = 0;
             for (Badge badge : mChild) {
-                Log.e("123", badge.getOwner());
                 mCount += badge.getCount();
             }
         }

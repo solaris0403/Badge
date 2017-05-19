@@ -10,10 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 绑定，如果没有，则将数据进行写入更新，
- * 如果数据库中有，则直接更新
- * <p>
- * 更新，更新数据库，更新
+ * Badge管理类
+ * 整体架构为单向数据流，每次更新badge则直接对数数据库进行操作，并且重新构建整个badge的依赖关系，之后根据新的依赖关系更新view。
+ * 1. badge树模型的构建
+ * 2. 对view的管理
+ * 3. 每次操作数据库则全量更新view，确保显示与存储的一致性
  */
 public class BadgeManager {
     private static final String TAG = "BadgeManager";
@@ -42,31 +43,37 @@ public class BadgeManager {
     }
 
     /**
-     * 插入新的数据
+     * 根据用户配置插入新数据
      */
     private void init() {
         if (mBadgeConfig != null) {
             Map<String, Badge> map = mBadgeConfig.initializeNewBadges();
-            for (String owner : map.keySet()) {
-                DBUtils.insertBadge(mContext, map.get(owner));
+            if (map != null) {
+                for (String owner : map.keySet()) {
+                    DBUtils.insertBadge(mContext, map.get(owner));
+                }
             }
         }
         generateBadgeTree();
     }
 
+    //存储数据库中所有的数据
     private Map<String, Badge> mBadgeMap = new HashMap<>();
+    //所有绑定成功的ui接口
     private Map<String, SoftReference<IBadge>> mUIMap = new HashMap<>();
 
     /**
-     * 每次对数据库更新都要重新构造一个数据树
+     * 每次对数据库更新都要重新构造一个树
      */
     private void generateBadgeTree() {
         mBadgeMap.clear();
-        List<Badge> allBadges = DBUtils.queryBadges(mContext);
-        for (Badge badge : allBadges) {
+        List<Badge> badges = DBUtils.queryBadges(mContext);
+        //把所有元素加入map中
+        for (Badge badge : badges) {
             mBadgeMap.put(badge.getOwner(), badge);
         }
-        for (Badge badge : allBadges) {
+        //二次对所有有父节点的数据进行关联
+        for (Badge badge : badges) {
             if (!TextUtils.isEmpty(badge.getLeader())) {
                 mBadgeMap.get(badge.getLeader()).addChild(badge);
             }
@@ -74,13 +81,10 @@ public class BadgeManager {
     }
 
     /**
-     * 绑定view，并且更新
-     *
-     * @param owner
-     * @param iBadge
+     * 绑定view，并且根据数据库中的数据进行更新
      */
     public void bindBadge(String owner, IBadge iBadge) {
-        Log.i(TAG, "bindBadge:" + owner);
+        Log. (TAG, "bindBadge:" + owner);
         Badge badge = mBadgeMap.get(owner);
         if (badge != null) {
             mUIMap.put(badge.getOwner(), new SoftReference<>(iBadge));
@@ -89,9 +93,13 @@ public class BadgeManager {
     }
 
     /**
-     * 直接对数据库进行修改，存在的UI也会更新
+     * 直接对数据库进行修改，之后重建树模型，并根据最新数据更新存在的UI
+     * 注意：
+     * 更新单一badge计数之后父节点的计数也会改变，但由于getCount()方法使用深层遍历，
+     * 所以再次全量更新数据库是没有必要的，只要确保当前节点的计数准确即可。
      */
     public void updateBadge(String owner, OnBadgeListener listener) {
+        Log.i(TAG, "updateBadge:" + owner);
         Badge badge = mBadgeMap.get(owner);
         if (listener != null && badge != null) {
             DBUtils.updateBadge(mContext, listener.onChange(badge));
@@ -101,7 +109,7 @@ public class BadgeManager {
     }
 
     /**
-     * 更新界面
+     * ui单一更新
      */
     private void updateBadgeUI(Badge badge) {
         SoftReference<IBadge> softReference = mUIMap.get(badge.getOwner());
@@ -113,6 +121,9 @@ public class BadgeManager {
         }
     }
 
+    /**
+     * ui全量更新
+     */
     private void updateBadgesUI() {
         for (String owner : mUIMap.keySet()) {
             SoftReference<IBadge> softReference = mUIMap.get(owner);

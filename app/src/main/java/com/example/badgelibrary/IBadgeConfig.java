@@ -8,8 +8,9 @@ import java.util.Map;
 
 public interface IBadgeConfig {
     /**
-     * 添加数据库中没有的新记录
-     * @return
+     * 初始化用户预置的badge
+     *
+     * @return 所有需要的badge
      */
     Map<String, Badge> initializeNewBadges();
 }

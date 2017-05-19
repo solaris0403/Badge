@@ -1,7 +1,7 @@
 package com.example.badgelibrary;
 
 /**
- * Created by tony on 5/19/17.
+ * 更新回调接口，可通过该接口返回数据库中的badge进行修改
  */
 
 public interface OnBadgeListener {
