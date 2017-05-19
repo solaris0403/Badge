@@ -1,29 +1,26 @@
 package com.example.badgelibrary;
 
 
+import android.util.Log;
+
+import com.example.badgelibrary.db.BadgeTable;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Badge实体类，其中持有View的引用，每次初始化的时候会针对现有的owner进行数据库删除。
+ * Badge实体类，利用List持有逻辑子元素的引用，利用Composite Pattern进行遍历更新依赖。
  */
 
 public class Badge {
-    //显示形式
-    public static final int BADGE_DISPLAY_TYPE_DOT = 0x01;
-    public static final int BADGE_DISPLAY_TYPE_CIRCLE = 0x01 << 1;
-    public static final int BADGE_DISPLAY_TYPE_NEW = 0x01 << 2;
-    //显示状态
-    public static final int BADGE_DISPLAY_STATE_VISIBLE = 0x02;
-    public static final int BADGE_DISPLAY_STATE_INVISIBLE = 0x02 << 1;
-    //显示模式,自动/手动
-    public static final int BADGE_DISPLAY_MODE_AUTO = 0x03;
-    public static final int BADGE_DISPLAY_MODE_MANUAL = 0x03 << 1;
-
-    private int mDisplayType = BADGE_DISPLAY_TYPE_DOT;
-    private int mDisplayState = BADGE_DISPLAY_STATE_VISIBLE;
-    private int mDisplayMode = BADGE_DISPLAY_MODE_AUTO;
+    private int mDisplayType = BadgeTable.TYPE_NUMBER;
+    private int mDisplayState = BadgeTable.STATE_VISIBLE;
+    private int mDisplayMode = BadgeTable.MODE_AUTO;
     private int mCount;
     private String mContent;
     private String mOwner;
     private String mLeader;
+    private List<Badge> mChild = new ArrayList<>();
 
     public Badge(String owner) {
         this.mOwner = owner;
@@ -54,6 +51,13 @@ public class Badge {
     }
 
     public int getCount() {
+        if (!mChild.isEmpty()) {
+            mCount = 0;
+            for (Badge badge : mChild) {
+                Log.e("123", badge.getOwner());
+                mCount += badge.getCount();
+            }
+        }
         return mCount;
     }
 
@@ -73,10 +77,6 @@ public class Badge {
         return mOwner;
     }
 
-    private void setOwner(String owner) {
-        this.mOwner = owner;
-    }
-
     public String getLeader() {
         return mLeader;
     }
@@ -85,16 +85,11 @@ public class Badge {
         this.mLeader = leader;
     }
 
-    @Override
-    public String toString() {
-        return "Badge{" +
-                "mDisplayType=" + mDisplayType +
-                ", mDisplayState=" + mDisplayState +
-                ", mDisplayMode=" + mDisplayMode +
-                ", mCount=" + mCount +
-                ", mContent='" + mContent + '\'' +
-                ", mOwner='" + mOwner + '\'' +
-                ", mLeader='" + mLeader + '\'' +
-                '}';
+    public List<Badge> getChild() {
+        return mChild;
+    }
+
+    public void addChild(Badge child) {
+        this.mChild.add(child);
     }
 }

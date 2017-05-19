@@ -8,6 +8,7 @@ import android.widget.Button;
 import com.example.badgelibrary.Badge;
 import com.example.badgelibrary.BadgeHelper;
 import com.example.badgelibrary.IBadge;
+import com.example.badgelibrary.OnBadgeListener;
 
 public class TestActivity extends AppCompatActivity {
     private Button mBtnOne, mBtnTwo;
@@ -33,21 +34,25 @@ public class TestActivity extends AppCompatActivity {
         mBtnOne.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Badge badge = BadgeHelper.findBadge(MyBadge.BADGE_TEST_ONE);
-                if (badge != null) {
-                    badge.setCount(badge.getCount() + 1);
-                    BadgeHelper.updateBadge(badge);
-                }
+                BadgeHelper.updateBadge(MyBadge.BADGE_TEST_ONE, new OnBadgeListener() {
+                    @Override
+                    public Badge onChange(Badge badge) {
+                        badge.setCount(badge.getCount() + 1);
+                        return badge;
+                    }
+                });
             }
         });
         mBtnTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Badge badge = BadgeHelper.findBadge(MyBadge.BADGE_TEST_TWO);
-                if (badge != null) {
-                    badge.setCount(badge.getCount() + 1);
-                    BadgeHelper.updateBadge(badge);
-                }
+                BadgeHelper.updateBadge(MyBadge.BADGE_TEST_TWO, new OnBadgeListener() {
+                    @Override
+                    public Badge onChange(Badge badge) {
+                        badge.setCount(badge.getCount() + 1);
+                        return badge;
+                    }
+                });
             }
         });
     }

@@ -4,14 +4,10 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.example.badgelibrary.db.BadgeDao;
-import com.example.tony.badgedemo.BadgeApplication;
-
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static com.example.badgelibrary.DBUtils.insertBadge;
 
 /**
  * 绑定，如果没有，则将数据进行写入更新，
@@ -46,95 +42,86 @@ public class BadgeManager {
     }
 
     /**
-     * 对于数据库中没有的直接进行插入
+     * 插入新的数据
      */
     private void init() {
         if (mBadgeConfig != null) {
             Map<String, Badge> map = mBadgeConfig.initializeNewBadges();
             for (String owner : map.keySet()) {
-                Log.i(TAG, "init insert:" + owner);
                 DBUtils.insertBadge(mContext, map.get(owner));
+            }
+        }
+        generateBadgeTree();
+    }
+
+    private Map<String, Badge> mBadgeMap = new HashMap<>();
+    private Map<String, SoftReference<IBadge>> mUIMap = new HashMap<>();
+
+    /**
+     * 每次对数据库更新都要重新构造一个数据树
+     */
+    private void generateBadgeTree() {
+        mBadgeMap.clear();
+        List<Badge> allBadges = DBUtils.queryBadges(mContext);
+        for (Badge badge : allBadges) {
+            mBadgeMap.put(badge.getOwner(), badge);
+        }
+        for (Badge badge : allBadges) {
+            if (!TextUtils.isEmpty(badge.getLeader())) {
+                mBadgeMap.get(badge.getLeader()).addChild(badge);
             }
         }
     }
 
-    //当前应用中保存的ui记录，用于更新
-    private Map<String, SoftReference<IBadge>> uimap = new HashMap<>();
-
-
+    /**
+     * 绑定view，并且更新
+     *
+     * @param owner
+     * @param iBadge
+     */
     public void bindBadge(String owner, IBadge iBadge) {
         Log.i(TAG, "bindBadge:" + owner);
-        uimap.put(owner, new SoftReference<>(iBadge));
-        Badge dbbadge = findBadge(owner);
-        if (dbbadge != null) {
-            updateRelation(dbbadge);
+        Badge badge = mBadgeMap.get(owner);
+        if (badge != null) {
+            mUIMap.put(badge.getOwner(), new SoftReference<>(iBadge));
+            updateBadgeUI(badge);
         }
     }
 
     /**
      * 直接对数据库进行修改，存在的UI也会更新
-     *
-     * @param uibadge
      */
-    public void updateBadge(Badge uibadge) {
-        Log.i(TAG, "updateBadge:" + uibadge.toString());
-        if (findBadge(uibadge.getOwner()) == null) {
-            insertBadge(mContext, uibadge);
+    public void updateBadge(String owner, OnBadgeListener listener) {
+        Badge badge = mBadgeMap.get(owner);
+        if (listener != null && badge != null) {
+            DBUtils.updateBadge(mContext, listener.onChange(badge));
+            generateBadgeTree();
+            updateBadgesUI();
         }
-        updateRelation(uibadge);
-    }
-
-    public void unbindBadge(String owner) {
-        uimap.remove(owner);
-        DBUtils.deleteBadge(owner);
-    }
-
-    /**
-     * 已经修改了当前的
-     * 更新数据库中的关系
-     * <p>
-     * 目前没有针对修改子节点的需求，所以可以只提供修改父节点的功能
-     */
-    private void updateRelation(Badge badge) {
-        int badgeOldCount = findBadge(badge.getOwner()).getCount();
-        int badgeNewCount = badge.getCount();
-        DBUtils.updateBadge(badge);
-        updateBadgeUI(badge);
-        String leader = badge.getLeader();
-        if (!TextUtils.isEmpty(leader)) {
-            //对夫节点进行修改
-            Badge leaderBadge = findBadge(leader);
-            if (leaderBadge != null) {
-                leaderBadge.setCount(leaderBadge.getCount() + (badgeNewCount - badgeOldCount));
-                //递归修改父节点
-                updateRelation(leaderBadge);
-            }
-        }
-    }
-
-    /**
-     * 内部调用有可能为空
-     *
-     * @param owner
-     * @return
-     */
-    private Badge findBadge(String owner) {
-        BadgeDao dao = new BadgeDao(BadgeApplication.getInstance());
-        return dao.query(owner);
     }
 
     /**
      * 更新界面
-     *
-     * @param badge 从数据库中拿到的badge
      */
     private void updateBadgeUI(Badge badge) {
-        Log.e(TAG, "updateBadgeUI:" + badge.toString());
-        SoftReference<IBadge> softReference = uimap.get(badge.getOwner());
+        SoftReference<IBadge> softReference = mUIMap.get(badge.getOwner());
         if (softReference != null) {
             IBadge iBadge = softReference.get();
             if (iBadge != null) {
                 iBadge.display(badge);
+            }
+        }
+    }
+
+    private void updateBadgesUI() {
+        for (String owner : mUIMap.keySet()) {
+            SoftReference<IBadge> softReference = mUIMap.get(owner);
+            if (softReference != null) {
+                IBadge iBadge = softReference.get();
+                Badge badge = mBadgeMap.get(owner);
+                if (iBadge != null && badge != null) {
+                    iBadge.display(badge);
+                }
             }
         }
     }

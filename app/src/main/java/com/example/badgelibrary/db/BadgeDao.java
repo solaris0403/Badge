@@ -26,14 +26,14 @@ public class BadgeDao extends Dao {
     public void insert(Badge badge) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("type", badge.getDisplayType());
-        contentValues.put("state", badge.getDisplayState());
-        contentValues.put("mode", badge.getDisplayMode());
-        contentValues.put("count", badge.getCount());
-        contentValues.put("content", badge.getContent());
-        contentValues.put("owner", badge.getOwner());
-        contentValues.put("leader", badge.getLeader());
-        db.insert(DatabaseHelper.TB_BADGE_NAME, null, contentValues);
+        contentValues.put(BadgeTable.Columns.BADGE_TYPE, badge.getDisplayType());
+        contentValues.put(BadgeTable.Columns.BADGE_STATE, badge.getDisplayState());
+        contentValues.put(BadgeTable.Columns.BADGE_MODE, badge.getDisplayMode());
+        contentValues.put(BadgeTable.Columns.BADGE_COUNT, badge.getCount());
+        contentValues.put(BadgeTable.Columns.BADGE_CONTENT, badge.getContent());
+        contentValues.put(BadgeTable.Columns.BADGE_OWNER, badge.getOwner());
+        contentValues.put(BadgeTable.Columns.BADGE_LEADER, badge.getLeader());
+        db.insert(BadgeTable.TABLE_NAME, null, contentValues);
         Log.d(TAG, "insert:" + badge.toString());
         db.close();
     }
@@ -41,7 +41,7 @@ public class BadgeDao extends Dao {
     @Override
     public void delete(String owner) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(DatabaseHelper.TB_BADGE_NAME, "owner = ?", new String[]{owner});
+        db.delete(BadgeTable.TABLE_NAME, BadgeTable.Columns.BADGE_OWNER + "=?", new String[]{owner});
         Log.d(TAG, "delete:" + owner);
         db.close();
     }
@@ -50,15 +50,15 @@ public class BadgeDao extends Dao {
     public void update(Badge badge) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("type", badge.getDisplayType());
-        contentValues.put("state", badge.getDisplayState());
-        contentValues.put("mode", badge.getDisplayMode());
-        contentValues.put("count", badge.getCount());
-        contentValues.put("content", badge.getContent());
-        contentValues.put("owner", badge.getOwner());
-        contentValues.put("leader", badge.getLeader());
-        db.update(DatabaseHelper.TB_BADGE_NAME, contentValues, "owner = ?", new String[]{badge.getOwner()});
-        Log.d(TAG, "updateInfo:" + badge.toString());
+        contentValues.put(BadgeTable.Columns.BADGE_TYPE, badge.getDisplayType());
+        contentValues.put(BadgeTable.Columns.BADGE_STATE, badge.getDisplayState());
+        contentValues.put(BadgeTable.Columns.BADGE_MODE, badge.getDisplayMode());
+        contentValues.put(BadgeTable.Columns.BADGE_COUNT, badge.getCount());
+        contentValues.put(BadgeTable.Columns.BADGE_CONTENT, badge.getContent());
+        contentValues.put(BadgeTable.Columns.BADGE_OWNER, badge.getOwner());
+        contentValues.put(BadgeTable.Columns.BADGE_LEADER, badge.getLeader());
+        db.update(BadgeTable.TABLE_NAME, contentValues, BadgeTable.Columns.BADGE_OWNER + "=?", new String[]{badge.getOwner()});
+        Log.d(TAG, "update:" + badge.toString());
         db.close();
     }
 
@@ -67,16 +67,16 @@ public class BadgeDao extends Dao {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         Cursor cursor = null;
         try {
-            cursor = db.query(DatabaseHelper.TB_BADGE_NAME, null, "owner = ?", new String[]{owner}, null, null, null);
+            cursor = db.query(BadgeTable.TABLE_NAME, null, BadgeTable.Columns.BADGE_OWNER + "=?", new String[]{owner}, null, null, null);
             if (cursor.moveToFirst()) {
                 Badge badge = new Badge(owner);
-                badge.setDisplayType(cursor.getInt(cursor.getColumnIndex("type")));
-                badge.setDisplayState(cursor.getInt(cursor.getColumnIndex("state")));
-                badge.setDisplayMode(cursor.getInt(cursor.getColumnIndex("mode")));
-                badge.setCount(cursor.getInt(cursor.getColumnIndex("count")));
-                badge.setContent(cursor.getString(cursor.getColumnIndex("content")));
-                badge.setLeader(cursor.getString(cursor.getColumnIndex("leader")));
-                Log.d(TAG, "queryInfo:" + badge.toString());
+                badge.setDisplayType(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_TYPE)));
+                badge.setDisplayState(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_STATE)));
+                badge.setDisplayMode(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_MODE)));
+                badge.setCount(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_COUNT)));
+                badge.setContent(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_CONTENT)));
+                badge.setLeader(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_LEADER)));
+                Log.d(TAG, "query:" + badge.toString());
                 return badge;
             }
         } catch (Exception e) {
@@ -98,16 +98,17 @@ public class BadgeDao extends Dao {
         Cursor cursor = null;
         List<Badge> mBadges = new ArrayList<>();
         try {
-            cursor = db.query(DatabaseHelper.TB_BADGE_NAME, null, null, null, null, null, null);
-            while (cursor.moveToNext()){
-                Badge badge = new Badge(cursor.getString(cursor.getColumnIndex("owner")));
-                badge.setDisplayType(cursor.getInt(cursor.getColumnIndex("type")));
-                badge.setDisplayState(cursor.getInt(cursor.getColumnIndex("state")));
-                badge.setDisplayMode(cursor.getInt(cursor.getColumnIndex("mode")));
-                badge.setCount(cursor.getInt(cursor.getColumnIndex("count")));
-                badge.setContent(cursor.getString(cursor.getColumnIndex("content")));
-                badge.setLeader(cursor.getString(cursor.getColumnIndex("leader")));
+            cursor = db.query(BadgeTable.TABLE_NAME, null, null, null, null, null, null);
+            while (cursor.moveToNext()) {
+                Badge badge = new Badge(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_OWNER)));
+                badge.setDisplayType(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_TYPE)));
+                badge.setDisplayState(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_STATE)));
+                badge.setDisplayMode(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_MODE)));
+                badge.setCount(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_COUNT)));
+                badge.setContent(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_CONTENT)));
+                badge.setLeader(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_LEADER)));
                 mBadges.add(badge);
+                Log.d(TAG, "query:" + badge.toString());
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString());

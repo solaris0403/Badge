@@ -11,10 +11,10 @@ import java.util.List;
  */
 
 public abstract class Dao {
-    protected DatabaseHelper dbHelper;
+    protected BadgeDBHelper dbHelper;
 
     public Dao(Context context) {
-        dbHelper = new DatabaseHelper(context);
+        dbHelper = new BadgeDBHelper(context);
     }
 
     public abstract void insert(Badge badge);
@@ -27,7 +27,7 @@ public abstract class Dao {
 
     public abstract List<Badge> query();
 
-    protected void close() {
+    public void close() {
         dbHelper.close();
     }
 }

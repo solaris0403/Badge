@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import com.example.badgelibrary.Badge;
 import com.example.badgelibrary.IBadge;
+import com.example.badgelibrary.db.BadgeTable;
 
 /**
  * Created by tony on 5/15/17.
@@ -29,19 +30,19 @@ public class NumBadge extends TextView implements IBadge {
     @Override
     public void display(Badge badge) {
         switch (badge.getDisplayState()) {
-            case Badge.BADGE_DISPLAY_STATE_VISIBLE:
+            case BadgeTable.STATE_VISIBLE:
                 setVisibility(VISIBLE);
                 break;
-            case Badge.BADGE_DISPLAY_STATE_INVISIBLE:
+            case BadgeTable.STATE_INVISIBLE:
                 setVisibility(INVISIBLE);
                 break;
         }
-        switch (badge.getDisplayType()) {//更改视图类型
-            case Badge.BADGE_DISPLAY_TYPE_DOT:
+        switch (badge.getDisplayType()) {
+            case BadgeTable.TYPE_DOT:
                 break;
-            case Badge.BADGE_DISPLAY_TYPE_CIRCLE:
+            case BadgeTable.TYPE_NUMBER:
                 break;
-            case Badge.BADGE_DISPLAY_TYPE_NEW:
+            case BadgeTable.TYPE_NEW:
                 break;
         }
         setText(String.valueOf(badge.getCount()));

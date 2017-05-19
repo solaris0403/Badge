@@ -9,11 +9,7 @@ public class BadgeHelper {
         BadgeManager.getInstance().bindBadge(owner, iBadge);
     }
 
-    public static void updateBadge(Badge badge) {
-        BadgeManager.getInstance().updateBadge(badge);
-    }
-
-    public static Badge findBadge(String owner) {
-        return DBUtils.queryBadge(owner);
+    public static void updateBadge(String owner, OnBadgeListener onBadgeListener) {
+        BadgeManager.getInstance().updateBadge(owner, onBadgeListener);
     }
 }
