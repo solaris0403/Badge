@@ -7,5 +7,9 @@ import java.util.Map;
  */
 
 public interface IBadgeConfig {
-    Map<String, Badge> initializeBadge();
+    /**
+     * 添加数据库中没有的新记录
+     * @return
+     */
+    Map<String, Badge> initializeNewBadges();
 }

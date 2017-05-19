@@ -1,11 +1,15 @@
 package com.example.badgelibrary;
 
+import android.content.Context;
+
 import com.example.badgelibrary.db.BadgeDao;
 import com.example.tony.badgedemo.BadgeApplication;
 
+import java.util.List;
+
 public class DBUtils {
-    public static void insertBadge(Badge badge) {
-        BadgeDao dao = new BadgeDao(BadgeApplication.getInstance());
+    public static void insertBadge(Context context, Badge badge) {
+        BadgeDao dao = new BadgeDao(context);
         dao.insert(badge);
     }
 
@@ -22,5 +26,10 @@ public class DBUtils {
     public static void deleteBadge(String owner) {
         BadgeDao dao = new BadgeDao(BadgeApplication.getInstance());
         dao.delete(owner);
+    }
+
+    public static List<Badge> queryBadges(Context context) {
+        BadgeDao dao = new BadgeDao(context);
+        return dao.query();
     }
 }

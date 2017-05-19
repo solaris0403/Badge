@@ -7,26 +7,47 @@ import android.widget.Button;
 
 import com.example.badgelibrary.Badge;
 import com.example.badgelibrary.BadgeHelper;
-import com.example.badgelibrary.widget.NumBadge;
+import com.example.badgelibrary.IBadge;
 
 public class TestActivity extends AppCompatActivity {
-    private Button mBtnTwo;
-    private NumBadge mNumBadge;
+    private Button mBtnOne, mBtnTwo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        mBtnOne = (Button) findViewById(R.id.btn_one);
+        BadgeHelper.bindBadge(MyBadge.BADGE_TEST_ONE, new IBadge() {
+            @Override
+            public void display(Badge badge) {
+                mBtnOne.setText(String.valueOf(badge.getCount()));
+            }
+        });
         mBtnTwo = (Button) findViewById(R.id.btn_two);
-        mNumBadge = (NumBadge) findViewById(R.id.badge);
-        BadgeHelper.bindBadge(BadgeHelper.BADGE_TEST_ONE, mNumBadge);
+        BadgeHelper.bindBadge(MyBadge.BADGE_TEST_TWO, new IBadge() {
+            @Override
+            public void display(Badge badge) {
+                mBtnTwo.setText(String.valueOf(badge.getCount()));
+            }
+        });
+        mBtnOne.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Badge badge = BadgeHelper.findBadge(MyBadge.BADGE_TEST_ONE);
+                if (badge != null) {
+                    badge.setCount(badge.getCount() + 1);
+                    BadgeHelper.updateBadge(badge);
+                }
+            }
+        });
         mBtnTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Badge badge = BadgeHelper.findBadge(BadgeHelper.BADGE_TEST_ONE);
-                badge.setLeader(BadgeHelper.BADGE_MAIN_ONE);
-                badge.setCount(badge.getCount() + 1);
-                BadgeHelper.updateBadge(badge);
+                Badge badge = BadgeHelper.findBadge(MyBadge.BADGE_TEST_TWO);
+                if (badge != null) {
+                    badge.setCount(badge.getCount() + 1);
+                    BadgeHelper.updateBadge(badge);
+                }
             }
         });
     }

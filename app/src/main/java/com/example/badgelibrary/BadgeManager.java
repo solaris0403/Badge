@@ -1,5 +1,6 @@
 package com.example.badgelibrary;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -18,9 +19,11 @@ import static com.example.badgelibrary.DBUtils.insertBadge;
  * <p>
  * 更新，更新数据库，更新
  */
-public class BadgeManager{
+public class BadgeManager {
     private static final String TAG = "BadgeManager";
     private static BadgeManager sInstance = null;
+    private Context mContext;
+    private IBadgeConfig mBadgeConfig;
 
     private BadgeManager() {
     }
@@ -30,6 +33,29 @@ public class BadgeManager{
             sInstance = new BadgeManager();
         }
         return sInstance;
+    }
+
+    public void init(Context context) {
+        init(context, null);
+    }
+
+    public void init(Context context, IBadgeConfig iBadgeConfig) {
+        this.mContext = context;
+        this.mBadgeConfig = iBadgeConfig;
+        init();
+    }
+
+    /**
+     * 对于数据库中没有的直接进行插入
+     */
+    private void init() {
+        if (mBadgeConfig != null) {
+            Map<String, Badge> map = mBadgeConfig.initializeNewBadges();
+            for (String owner : map.keySet()) {
+                Log.i(TAG, "init insert:" + owner);
+                DBUtils.insertBadge(mContext, map.get(owner));
+            }
+        }
     }
 
     //当前应用中保存的ui记录，用于更新
@@ -47,12 +73,13 @@ public class BadgeManager{
 
     /**
      * 直接对数据库进行修改，存在的UI也会更新
+     *
      * @param uibadge
      */
     public void updateBadge(Badge uibadge) {
         Log.i(TAG, "updateBadge:" + uibadge.toString());
         if (findBadge(uibadge.getOwner()) == null) {
-            insertBadge(uibadge);
+            insertBadge(mContext, uibadge);
         }
         updateRelation(uibadge);
     }
@@ -87,10 +114,11 @@ public class BadgeManager{
 
     /**
      * 内部调用有可能为空
+     *
      * @param owner
      * @return
      */
-    private Badge findBadge(String owner){
+    private Badge findBadge(String owner) {
         BadgeDao dao = new BadgeDao(BadgeApplication.getInstance());
         return dao.query(owner);
     }

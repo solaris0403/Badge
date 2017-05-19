@@ -24,7 +24,6 @@ public class Badge {
     private String mContent;
     private String mOwner;
     private String mLeader;
-//    private IBadge mIBadge;
 
     public Badge(String owner) {
         this.mOwner = owner;
@@ -85,14 +84,6 @@ public class Badge {
     public void setLeader(String leader) {
         this.mLeader = leader;
     }
-//
-//    public IBadge getIBadge() {
-//        return mIBadge;
-//    }
-//
-//    public void setIBadge(IBadge iBadge) {
-//        this.mIBadge = iBadge;
-//    }
 
     @Override
     public String toString() {

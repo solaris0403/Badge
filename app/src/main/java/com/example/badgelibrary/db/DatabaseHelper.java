@@ -17,9 +17,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + TB_BADGE_NAME +
+    private String getCreateSQL(){
+        String createString = "CREATE TABLE IF NOT EXISTS " + TB_BADGE_NAME +
                 " (_id INTEGER PRIMARY KEY," +
                 " type INTEGER DEFAULT 0," +
                 " state INTEGER DEFAULT 0," +
@@ -28,11 +27,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 " content TEXT DEFAULT ''," +
                 " owner TEXT DEFAULT ''," +
                 " leader TEXT DEFAULT ''," +
-                " UNIQUE(owner));");
+                " UNIQUE(owner));";
+        return createString;
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(getCreateSQL());
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
     }
 }

@@ -8,6 +8,9 @@ import android.util.Log;
 
 import com.example.badgelibrary.Badge;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by tony on 5/17/17.
  */
@@ -72,7 +75,6 @@ public class BadgeDao extends Dao {
                 badge.setDisplayMode(cursor.getInt(cursor.getColumnIndex("mode")));
                 badge.setCount(cursor.getInt(cursor.getColumnIndex("count")));
                 badge.setContent(cursor.getString(cursor.getColumnIndex("content")));
-//                badge.setOwner(cursor.getString(cursor.getColumnIndex("owner")));
                 badge.setLeader(cursor.getString(cursor.getColumnIndex("leader")));
                 Log.d(TAG, "queryInfo:" + badge.toString());
                 return badge;
@@ -88,5 +90,35 @@ public class BadgeDao extends Dao {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<Badge> query() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor cursor = null;
+        List<Badge> mBadges = new ArrayList<>();
+        try {
+            cursor = db.query(DatabaseHelper.TB_BADGE_NAME, null, null, null, null, null, null);
+            while (cursor.moveToNext()){
+                Badge badge = new Badge(cursor.getString(cursor.getColumnIndex("owner")));
+                badge.setDisplayType(cursor.getInt(cursor.getColumnIndex("type")));
+                badge.setDisplayState(cursor.getInt(cursor.getColumnIndex("state")));
+                badge.setDisplayMode(cursor.getInt(cursor.getColumnIndex("mode")));
+                badge.setCount(cursor.getInt(cursor.getColumnIndex("count")));
+                badge.setContent(cursor.getString(cursor.getColumnIndex("content")));
+                badge.setLeader(cursor.getString(cursor.getColumnIndex("leader")));
+                mBadges.add(badge);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.toString());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            if (db != null) {
+                db.close();
+            }
+        }
+        return mBadges;
     }
 }
