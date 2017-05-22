@@ -1,8 +1,5 @@
 package com.example.badgelibrary;
 
-
-import android.util.Log;
-
 import com.example.badgelibrary.db.BadgeTable;
 
 import java.util.ArrayList;

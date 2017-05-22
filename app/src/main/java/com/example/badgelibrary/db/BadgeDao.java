@@ -34,7 +34,7 @@ public class BadgeDao extends Dao {
         contentValues.put(BadgeTable.Columns.BADGE_OWNER, badge.getOwner());
         contentValues.put(BadgeTable.Columns.BADGE_LEADER, badge.getLeader());
         db.insert(BadgeTable.TABLE_NAME, null, contentValues);
-        Log.d(TAG, "insert:" + badge.toString());
+        Log.i(TAG, "insert:" + badge.toString());
         db.close();
     }
 
@@ -42,7 +42,7 @@ public class BadgeDao extends Dao {
     public void delete(String owner) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(BadgeTable.TABLE_NAME, BadgeTable.Columns.BADGE_OWNER + "=?", new String[]{owner});
-        Log.d(TAG, "delete:" + owner);
+        Log.i(TAG, "delete:" + owner);
         db.close();
     }
 
@@ -58,7 +58,7 @@ public class BadgeDao extends Dao {
         contentValues.put(BadgeTable.Columns.BADGE_OWNER, badge.getOwner());
         contentValues.put(BadgeTable.Columns.BADGE_LEADER, badge.getLeader());
         db.update(BadgeTable.TABLE_NAME, contentValues, BadgeTable.Columns.BADGE_OWNER + "=?", new String[]{badge.getOwner()});
-        Log.d(TAG, "update:" + badge.toString());
+        Log.i(TAG, "update:" + badge.toString());
         db.close();
     }
 
@@ -76,7 +76,7 @@ public class BadgeDao extends Dao {
                 badge.setCount(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_COUNT)));
                 badge.setContent(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_CONTENT)));
                 badge.setLeader(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_LEADER)));
-                Log.d(TAG, "query:" + badge.toString());
+                Log.i(TAG, "query:" + badge.toString());
                 return badge;
             }
         } catch (Exception e) {
@@ -108,10 +108,10 @@ public class BadgeDao extends Dao {
                 badge.setContent(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_CONTENT)));
                 badge.setLeader(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_LEADER)));
                 mBadges.add(badge);
-                Log.d(TAG, "query:" + badge.toString());
+                Log.i(TAG, "query:" + badge.toString());
             }
         } catch (Exception e) {
-            Log.e(TAG, e.toString());
+            Log.e(TAG, "query:" + e.toString());
         } finally {
             if (cursor != null) {
                 cursor.close();

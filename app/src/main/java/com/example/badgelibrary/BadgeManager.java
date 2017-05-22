@@ -1,6 +1,8 @@
 package com.example.badgelibrary;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -8,6 +10,8 @@ import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Badge管理类
@@ -21,8 +25,12 @@ public class BadgeManager {
     private static BadgeManager sInstance = null;
     private Context mContext;
     private IBadgeConfig mBadgeConfig;
+    private ExecutorService mExecutor;
+    private Handler mUIHandler;
 
     private BadgeManager() {
+        mExecutor = Executors.newSingleThreadExecutor();
+        mUIHandler = new Handler(Looper.getMainLooper());
     }
 
     public static BadgeManager getInstance() {
@@ -39,22 +47,27 @@ public class BadgeManager {
     public void init(Context context, IBadgeConfig iBadgeConfig) {
         this.mContext = context;
         this.mBadgeConfig = iBadgeConfig;
-        init();
+        initBadge();
     }
 
     /**
      * 根据用户配置插入新数据
      */
-    private void init() {
-        if (mBadgeConfig != null) {
-            Map<String, Badge> map = mBadgeConfig.initializeNewBadges();
-            if (map != null) {
-                for (String owner : map.keySet()) {
-                    DBUtils.insertBadge(mContext, map.get(owner));
+    private void initBadge() {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (mBadgeConfig != null) {
+                    Map<String, Badge> map = mBadgeConfig.initializeNewBadges();
+                    if (map != null) {
+                        for (String owner : map.keySet()) {
+                            DBUtils.insertBadge(mContext, map.get(owner));
+                        }
+                    }
                 }
+                generateBadgeTree();
             }
-        }
-        generateBadgeTree();
+        });
     }
 
     //存储数据库中所有的数据
@@ -84,7 +97,7 @@ public class BadgeManager {
      * 绑定view，并且根据数据库中的数据进行更新
      */
     public void bindBadge(String owner, IBadge iBadge) {
-        Log. (TAG, "bindBadge:" + owner);
+        Log.i(TAG, "bindBadge:" + owner);
         Badge badge = mBadgeMap.get(owner);
         if (badge != null) {
             mUIMap.put(badge.getOwner(), new SoftReference<>(iBadge));
@@ -98,14 +111,19 @@ public class BadgeManager {
      * 更新单一badge计数之后父节点的计数也会改变，但由于getCount()方法使用深层遍历，
      * 所以再次全量更新数据库是没有必要的，只要确保当前节点的计数准确即可。
      */
-    public void updateBadge(String owner, OnBadgeListener listener) {
+    public void updateBadge(final String owner, final OnBadgeListener listener) {
         Log.i(TAG, "updateBadge:" + owner);
-        Badge badge = mBadgeMap.get(owner);
-        if (listener != null && badge != null) {
-            DBUtils.updateBadge(mContext, listener.onChange(badge));
-            generateBadgeTree();
-            updateBadgesUI();
-        }
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Badge badge = mBadgeMap.get(owner);
+                if (listener != null && badge != null) {
+                    DBUtils.updateBadge(mContext, listener.onChange(badge));
+                    generateBadgeTree();
+                    updateBadgesUI();
+                }
+            }
+        });
     }
 
     /**
@@ -125,15 +143,20 @@ public class BadgeManager {
      * ui全量更新
      */
     private void updateBadgesUI() {
-        for (String owner : mUIMap.keySet()) {
-            SoftReference<IBadge> softReference = mUIMap.get(owner);
-            if (softReference != null) {
-                IBadge iBadge = softReference.get();
-                Badge badge = mBadgeMap.get(owner);
-                if (iBadge != null && badge != null) {
-                    iBadge.display(badge);
+        mUIHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (String owner : mUIMap.keySet()) {
+                    SoftReference<IBadge> softReference = mUIMap.get(owner);
+                    if (softReference != null) {
+                        IBadge iBadge = softReference.get();
+                        Badge badge = mBadgeMap.get(owner);
+                        if (iBadge != null && badge != null) {
+                            iBadge.display(badge);
+                        }
+                    }
                 }
             }
-        }
+        });
     }
 }
