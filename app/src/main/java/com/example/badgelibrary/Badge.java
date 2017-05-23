@@ -9,7 +9,7 @@ import java.util.List;
  * Badge实体类，利用List持有逻辑子元素的引用，进行遍历更新依赖。
  */
 
-public class Badge {
+public class Badge implements Operator {
     private int mDisplayType = BadgeTable.TYPE_NUMBER;
     private int mDisplayState = BadgeTable.STATE_VISIBLE;
     private int mDisplayMode = BadgeTable.MODE_AUTO;
@@ -90,5 +90,20 @@ public class Badge {
 
     public void addChild(Badge child) {
         this.mChild.add(child);
+    }
+
+    @Override
+    public void read() {
+        setCount(0);
+        if (!mChild.isEmpty()) {
+            for (Badge badge : mChild) {
+                badge.read();
+            }
+        }
+    }
+
+    @Override
+    public void unread() {
+        setCount(1);
     }
 }
