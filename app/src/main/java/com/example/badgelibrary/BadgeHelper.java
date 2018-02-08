@@ -7,10 +7,22 @@ package com.example.badgelibrary;
 public class BadgeHelper {
     /**
      * 绑定view
-     * @param owner 唯一的标识符
+     * @param name 唯一的标识符
      */
-    public static void bindBadge(String owner, IBadge iBadge) {
-        BadgeManager.getInstance().bindBadge(owner, iBadge);
+    public static void bindBadge(String name, IBadge iBadge) {
+        BadgeManager.getInstance().bindBadge(name, iBadge);
+    }
+
+    public static void bindBadge(IBadgeListener listener){
+
+    }
+
+    /**
+     * 绑定view
+     * @param name 唯一的标识符
+     */
+    public static void unbindBadge(String name) {
+        BadgeManager.getInstance().unbindBadge(name);
     }
 
     /**

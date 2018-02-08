@@ -12,9 +12,9 @@ public class DBUtils {
         dao.insert(badge);
     }
 
-    public static Badge queryBadge(Context context, String owner) {
+    public static Badge queryBadge(Context context, String name) {
         BadgeDao dao = new BadgeDao(context);
-        return dao.query(owner);
+        return dao.query(name);
     }
 
     public static void updateBadge(Context context, Badge badge) {
@@ -22,9 +22,9 @@ public class DBUtils {
         dao.update(badge);
     }
 
-    public static void deleteBadge(Context context, String owner) {
+    public static void deleteBadge(Context context, String name) {
         BadgeDao dao = new BadgeDao(context);
-        dao.delete(owner);
+        dao.delete(name);
     }
 
     public static List<Badge> queryBadges(Context context) {

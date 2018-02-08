@@ -10,100 +10,104 @@ import java.util.List;
  */
 
 public class Badge implements Operator {
-    private int mDisplayType = BadgeTable.TYPE_NUMBER;
-    private int mDisplayState = BadgeTable.STATE_VISIBLE;
-    private int mDisplayMode = BadgeTable.MODE_AUTO;
-    private int mCount;
-    private String mContent;
-    private String mOwner;
-    private String mLeader;
-    private List<Badge> mChild = new ArrayList<>();
+    private String user;
+    private String name;
+    private String parent;
+    private int state;
+    private int mode;
+    private int count;
+    private String content;
 
-    public Badge(String owner) {
-        this.mOwner = owner;
+    private List<Badge> child = new ArrayList<>();
+
+    public Badge(String name) {
+        this.name = name;
     }
 
-    public int getDisplayType() {
-        return mDisplayType;
+    public String getUser() {
+        return user;
     }
 
-    public void setDisplayType(int displayType) {
-        this.mDisplayType = displayType;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public int getDisplayState() {
-        return mDisplayState;
+    public int getState() {
+        return state;
     }
 
-    public void setDisplayState(int displayState) {
-        this.mDisplayState = displayState;
+    public void setState(int state) {
+        this.state = state;
     }
 
-    public int getDisplayMode() {
-        return mDisplayMode;
+    public int getMode() {
+        return mode;
     }
 
-    public void setDisplayMode(int displayMode) {
-        this.mDisplayMode = displayMode;
+    public void setMode(int mode) {
+        this.mode = mode;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public void setParent(String parent) {
+        this.parent = parent;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 
     /**
      * 通过深层遍历，累加子元素所有的计数
      */
     public int getCount() {
-        if (!mChild.isEmpty()) {
-            mCount = 0;
-            for (Badge badge : mChild) {
-                mCount += badge.getCount();
+        if (mode == BadgeTable.MODE_AUTO) {
+            count = 0;
+            for (Badge badge : child) {
+                count += badge.getCount();
             }
         }
-        return mCount;
+        return count;
     }
 
-    public void setCount(int count) {
-        this.mCount = count;
-    }
-
-    public String getContent() {
-        return mContent;
-    }
-
-    public void setContent(String content) {
-        this.mContent = content;
-    }
-
-    public String getOwner() {
-        return mOwner;
-    }
-
-    public String getLeader() {
-        return mLeader;
-    }
-
-    public void setLeader(String leader) {
-        this.mLeader = leader;
-    }
 
     public List<Badge> getChild() {
-        return mChild;
+        return child;
     }
 
     public void addChild(Badge child) {
-        this.mChild.add(child);
+        this.child.add(child);
     }
 
     @Override
     public void read() {
-        setCount(0);
-        if (!mChild.isEmpty()) {
-            for (Badge badge : mChild) {
+        if (mode == BadgeTable.MODE_AUTO) {
+            for (Badge badge : child) {
                 badge.read();
             }
         }
+        setCount(0);
+        setState(BadgeTable.STATE_NORMAL);
     }
 
     @Override
     public void unread() {
         setCount(1);
+        setState(BadgeTable.STATE_VISIBLE);
     }
 }

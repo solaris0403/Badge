@@ -1,5 +1,6 @@
 package com.example.badgelibrary;
 
+import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,7 +22,7 @@ import java.util.concurrent.Executors;
  * 3. 每次操作数据库则全量更新view，确保显示与存储的一致性
  */
 public class BadgeManager {
-    private static final String TAG = "BadgeManager";
+    private static final String TAG = BadgeManager.class.getSimpleName();
     private static BadgeManager sInstance = null;
     private Context mContext;
     private IBadgeConfig mBadgeConfig;
@@ -60,8 +61,8 @@ public class BadgeManager {
                 if (mBadgeConfig != null) {
                     Map<String, Badge> map = mBadgeConfig.initializeNewBadges();
                     if (map != null) {
-                        for (String owner : map.keySet()) {
-                            DBUtils.insertBadge(mContext, map.get(owner));
+                        for (String name : map.keySet()) {
+                            DBUtils.insertBadge(mContext, map.get(name));
                         }
                     }
                 }
@@ -73,7 +74,7 @@ public class BadgeManager {
     //存储数据库中所有的数据
     private Map<String, Badge> mBadgeMap = new HashMap<>();
     //所有绑定成功的ui接口
-    private Map<String, SoftReference<IBadge>> mUIMap = new HashMap<>();
+    private Map<String, IBadge> mUIMap = new HashMap<>();
 
     /**
      * 每次对数据库更新都要重新构造一个树
@@ -83,12 +84,12 @@ public class BadgeManager {
         List<Badge> badges = DBUtils.queryBadges(mContext);
         //把所有元素加入map中
         for (Badge badge : badges) {
-            mBadgeMap.put(badge.getOwner(), badge);
+            mBadgeMap.put(badge.getName(), badge);
         }
         //二次对所有有父节点的数据进行关联
         for (Badge badge : badges) {
-            if (!TextUtils.isEmpty(badge.getLeader())) {
-                mBadgeMap.get(badge.getLeader()).addChild(badge);
+            if (!TextUtils.isEmpty(badge.getParent())) {
+                mBadgeMap.get(badge.getParent()).addChild(badge);
             }
         }
     }
@@ -96,27 +97,31 @@ public class BadgeManager {
     /**
      * 绑定view，并且根据数据库中的数据进行更新
      */
-    public void bindBadge(String owner, IBadge iBadge) {
-        Log.i(TAG, "bindBadge:" + owner);
-        Badge badge = mBadgeMap.get(owner);
+    public void bindBadge(String name, IBadge iBadge) {
+        Log.i(TAG, "bindBadge:" + name);
+        Badge badge = mBadgeMap.get(name);
         if (badge != null) {
-            mUIMap.put(badge.getOwner(), new SoftReference<>(iBadge));
+            mUIMap.put(name, iBadge);
             updateBadgeUI(badge);
         }
+    }
+
+    public void unbindBadge(String name) {
+        mUIMap.remove(name);
     }
 
     /**
      * 直接对数据库进行修改，之后重建树模型，并根据最新数据更新存在的UI
      * 注意：
-     * 更新单一badge计数之后父节点的计数也会改变，但由于getCount()方法使用深层遍历，
+     * 更新单一badge计数之后父节点的计数也会改变，但由于getCount()调用时会深层遍历，
      * 所以再次全量更新数据库是没有必要的，只要确保当前节点的计数准确即可。
      */
-    public void updateBadge(final String owner, final OnBadgeListener listener) {
-        Log.i(TAG, "updateBadge:" + owner);
+    public void updateBadge(final String name, final OnBadgeListener listener) {
+        Log.i(TAG, "updateBadge:" + name);
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                Badge badge = mBadgeMap.get(owner);
+                Badge badge = mBadgeMap.get(name);
                 if (listener != null && badge != null) {
                     DBUtils.updateBadge(mContext, listener.onChange(badge));
                     generateBadgeTree();
@@ -130,12 +135,9 @@ public class BadgeManager {
      * ui单一更新
      */
     private void updateBadgeUI(Badge badge) {
-        SoftReference<IBadge> softReference = mUIMap.get(badge.getOwner());
-        if (softReference != null) {
-            IBadge iBadge = softReference.get();
-            if (iBadge != null) {
-                iBadge.display(badge);
-            }
+        IBadge iBadge = mUIMap.get(badge.getName());
+        if (iBadge != null) {
+            iBadge.display(badge);
         }
     }
 
@@ -146,14 +148,11 @@ public class BadgeManager {
         mUIHandler.post(new Runnable() {
             @Override
             public void run() {
-                for (String owner : mUIMap.keySet()) {
-                    SoftReference<IBadge> softReference = mUIMap.get(owner);
-                    if (softReference != null) {
-                        IBadge iBadge = softReference.get();
-                        Badge badge = mBadgeMap.get(owner);
-                        if (iBadge != null && badge != null) {
-                            iBadge.display(badge);
-                        }
+                for (String name : mUIMap.keySet()) {
+                    IBadge iBadge = mUIMap.get(name);
+                    Badge badge = mBadgeMap.get(name);
+                    if (iBadge != null && badge != null) {
+                        iBadge.display(badge);
                     }
                 }
             }

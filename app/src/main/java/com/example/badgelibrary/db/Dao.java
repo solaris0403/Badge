@@ -19,11 +19,11 @@ public abstract class Dao {
 
     public abstract void insert(Badge badge);
 
-    public abstract void delete(String owner);
+    public abstract void delete(String name);
 
     public abstract void update(Badge badge);
 
-    public abstract Badge query(String owner);
+    public abstract Badge query(String name);
 
     public abstract List<Badge> query();
 

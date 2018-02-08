@@ -8,6 +8,7 @@ import android.widget.Button;
 
 import com.example.badgelibrary.Badge;
 import com.example.badgelibrary.BadgeHelper;
+import com.example.badgelibrary.IBadgeListener;
 import com.example.badgelibrary.OnBadgeListener;
 import com.example.badgelibrary.widget.NumBadge;
 
@@ -35,11 +36,23 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+        BadgeHelper.bindBadge(new IBadgeListener(MyBadge.BADGE_TEST_ONE) {
+            @Override
+            public void update(Badge badge) {
+
+            }
+        });
         mBtnTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, TestActivity.class));
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BadgeHelper.unbindBadge(MyBadge.BADGE_MAIN_ONE);
     }
 }

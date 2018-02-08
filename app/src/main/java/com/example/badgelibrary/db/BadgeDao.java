@@ -16,7 +16,7 @@ import java.util.List;
  */
 
 public class BadgeDao extends Dao {
-    private static final String TAG = "BadgeDao";
+    private static final String TAG = BadgeDao.class.getSimpleName();
 
     public BadgeDao(Context context) {
         super(context);
@@ -26,23 +26,23 @@ public class BadgeDao extends Dao {
     public void insert(Badge badge) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(BadgeTable.Columns.BADGE_TYPE, badge.getDisplayType());
-        contentValues.put(BadgeTable.Columns.BADGE_STATE, badge.getDisplayState());
-        contentValues.put(BadgeTable.Columns.BADGE_MODE, badge.getDisplayMode());
-        contentValues.put(BadgeTable.Columns.BADGE_COUNT, badge.getCount());
+        contentValues.put(BadgeTable.Columns.BADGE_USER, badge.getUser());
+        contentValues.put(BadgeTable.Columns.BADGE_NAME, badge.getName());
+        contentValues.put(BadgeTable.Columns.BADGE_PARENT, badge.getParent());
+        contentValues.put(BadgeTable.Columns.BADGE_STATE, badge.getState());
+        contentValues.put(BadgeTable.Columns.BADGE_MODE, badge.getMode());
+        contentValues.put(BadgeTable.Columns.BADGE_COUNT, badge.getContent());
         contentValues.put(BadgeTable.Columns.BADGE_CONTENT, badge.getContent());
-        contentValues.put(BadgeTable.Columns.BADGE_OWNER, badge.getOwner());
-        contentValues.put(BadgeTable.Columns.BADGE_LEADER, badge.getLeader());
         db.insert(BadgeTable.TABLE_NAME, null, contentValues);
         Log.i(TAG, "insert:" + badge.toString());
         db.close();
     }
 
     @Override
-    public void delete(String owner) {
+    public void delete(String name) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(BadgeTable.TABLE_NAME, BadgeTable.Columns.BADGE_OWNER + "=?", new String[]{owner});
-        Log.i(TAG, "delete:" + owner);
+        db.delete(BadgeTable.TABLE_NAME, BadgeTable.Columns.BADGE_NAME + "=?", new String[]{name});
+        Log.i(TAG, "delete:" + name);
         db.close();
     }
 
@@ -50,32 +50,33 @@ public class BadgeDao extends Dao {
     public void update(Badge badge) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(BadgeTable.Columns.BADGE_TYPE, badge.getDisplayType());
-        contentValues.put(BadgeTable.Columns.BADGE_STATE, badge.getDisplayState());
-        contentValues.put(BadgeTable.Columns.BADGE_MODE, badge.getDisplayMode());
-        contentValues.put(BadgeTable.Columns.BADGE_COUNT, badge.getCount());
+        contentValues.put(BadgeTable.Columns.BADGE_USER, badge.getUser());
+        contentValues.put(BadgeTable.Columns.BADGE_NAME, badge.getName());
+        contentValues.put(BadgeTable.Columns.BADGE_PARENT, badge.getParent());
+        contentValues.put(BadgeTable.Columns.BADGE_STATE, badge.getState());
+        contentValues.put(BadgeTable.Columns.BADGE_MODE, badge.getMode());
+        contentValues.put(BadgeTable.Columns.BADGE_COUNT, badge.getContent());
         contentValues.put(BadgeTable.Columns.BADGE_CONTENT, badge.getContent());
-        contentValues.put(BadgeTable.Columns.BADGE_OWNER, badge.getOwner());
-        contentValues.put(BadgeTable.Columns.BADGE_LEADER, badge.getLeader());
-        db.update(BadgeTable.TABLE_NAME, contentValues, BadgeTable.Columns.BADGE_OWNER + "=?", new String[]{badge.getOwner()});
+        db.update(BadgeTable.TABLE_NAME, contentValues, BadgeTable.Columns.BADGE_NAME + "=?", new String[]{badge.getName()});
         Log.i(TAG, "update:" + badge.toString());
         db.close();
     }
 
     @Override
-    public Badge query(String owner) {
+    public Badge query(String name) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         Cursor cursor = null;
         try {
-            cursor = db.query(BadgeTable.TABLE_NAME, null, BadgeTable.Columns.BADGE_OWNER + "=?", new String[]{owner}, null, null, null);
+            cursor = db.query(BadgeTable.TABLE_NAME, null, BadgeTable.Columns.BADGE_NAME + "=?", new String[]{name}, null, null, null);
             if (cursor.moveToFirst()) {
-                Badge badge = new Badge(owner);
-                badge.setDisplayType(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_TYPE)));
-                badge.setDisplayState(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_STATE)));
-                badge.setDisplayMode(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_MODE)));
+                Badge badge = new Badge(name);
+                // TODO: 2018/2/3 多用户啊
+                badge.setUser(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_USER)));
+                badge.setParent(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_PARENT)));
+                badge.setState(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_STATE)));
+                badge.setMode(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_MODE)));
                 badge.setCount(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_COUNT)));
                 badge.setContent(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_CONTENT)));
-                badge.setLeader(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_LEADER)));
                 Log.i(TAG, "query:" + badge.toString());
                 return badge;
             }
@@ -100,13 +101,14 @@ public class BadgeDao extends Dao {
         try {
             cursor = db.query(BadgeTable.TABLE_NAME, null, null, null, null, null, null);
             while (cursor.moveToNext()) {
-                Badge badge = new Badge(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_OWNER)));
-                badge.setDisplayType(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_TYPE)));
-                badge.setDisplayState(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_STATE)));
-                badge.setDisplayMode(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_MODE)));
+                // TODO: 2018/2/3 多用户
+                Badge badge = new Badge(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_NAME)));
+                badge.setUser(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_USER)));
+                badge.setParent(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_PARENT)));
+                badge.setState(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_STATE)));
+                badge.setMode(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_MODE)));
                 badge.setCount(cursor.getInt(cursor.getColumnIndex(BadgeTable.Columns.BADGE_COUNT)));
                 badge.setContent(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_CONTENT)));
-                badge.setLeader(cursor.getString(cursor.getColumnIndex(BadgeTable.Columns.BADGE_LEADER)));
                 mBadges.add(badge);
                 Log.i(TAG, "query:" + badge.toString());
             }
